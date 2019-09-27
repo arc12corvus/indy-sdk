@@ -2,7 +2,7 @@ extern crate openssl;
 
 use errors::common::CommonError;
 
-use self::openssl::hash::{hash2, MessageDigest, Hasher, DigestBytes};
+use self::openssl::hash::{hash as hash2, MessageDigest, Hasher, DigestBytes};
 use self::openssl::error::ErrorStack;
 
 use std::error::Error;
@@ -12,7 +12,7 @@ pub const HASHBYTES: usize = 32;
 pub fn hash(input: &[u8]) -> Result<Vec<u8>, CommonError> {
     let mut hasher = Hash::new_context()?;
     hasher.update(input)?;
-    Ok(hasher.finish2().map(|b| b.to_vec())?)
+    Ok(hasher.finish().map(|b| b.to_vec())?)
 }
 
 pub struct Digest {
@@ -47,7 +47,7 @@ impl Hash {
         let mut ctx = Hash::new_context()?;
         ctx.update(&[0x00])?;
         leaf.update_context(&mut ctx)?;
-        Ok(Digest::new(ctx.finish2()?))
+        Ok(Digest::new(ctx.finish()?))
     }
 
     pub fn hash_nodes<T>(left: &T, right: &T) -> Result<Digest, CommonError> where T: Hashable {
@@ -55,7 +55,7 @@ impl Hash {
         ctx.update(&[0x01])?;
         left.update_context(&mut ctx)?;
         right.update_context(&mut ctx)?;
-        Ok(Digest::new(ctx.finish2()?))
+        Ok(Digest::new(ctx.finish()?))
     }
 
 }
@@ -102,3 +102,4 @@ impl From<ErrorStack> for CommonError {
         CommonError::InvalidStructure(err.description().to_string())
     }
 }
+
